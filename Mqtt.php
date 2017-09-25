@@ -55,6 +55,8 @@ class Mqtt
          */
         $connectMsg = Message::factory(MessageTypes::CONNECT);
         $connectMsg->setWill($this->will);
+        $connectMsg->setProtocol(self::PROTOCOL);
+        $connectMsg->setProtocolVersion(self::VERSION_3_1_1);
         $connectMsg->setUsername($username);
         $connectMsg->setPassword($password);
         $connectMsg->setClientId(Util::makeClientId());

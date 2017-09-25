@@ -13,10 +13,6 @@ use Mqtt\Message\Will\Will;
 class Connect extends Message
 {
     /**
-     * @var int message type.
-     */
-    protected $messageType = MessageTypes::CONNECT;
-    /**
      * @var string Client id.
      */
     protected $clientId;
@@ -33,19 +29,9 @@ class Connect extends Message
      */
     protected $will;
     /**
-     * @var boolean show clear session.
-     */
-    protected $clearSession;
-
-    /**
      * @var string Message body.
      */
     protected $msgBody = '';
-
-    /**
-     * @var integer $keepalive.
-     */
-    protected $keepalive = 60;
 
     /**
      * Connect constructor, set header in the constructor.
@@ -169,17 +155,17 @@ class Connect extends Message
      */
     public function setClearSession($clearSession)
     {
-        $this->clearSession = $clearSession;
+        $this->header->setClearSessionFlag($clearSession);
     }
 
     /**
      * Return clear session flag.
      *
-     * @return integer
+     * @return boolean
      */
     public function getClearSession()
     {
-        return $this->clearSession;
+        return $this->header->getClearSessionFlag();
     }
 
     /**
@@ -191,7 +177,7 @@ class Connect extends Message
      */
     public function setKeepalive($keepalive)
     {
-        $this->keepalive = (int) $keepalive;
+        $this->header->setKeepalive($keepalive);
     }
 
     /**
@@ -201,7 +187,21 @@ class Connect extends Message
      */
     public function getKeepalive()
     {
-        return $this->keepalive;
+        return $this->header->getKeepalive();
+    }
+
+    /**
+     * Set protocol.
+     *
+     * @param string $protocol Protocol.
+     *
+     * @throws BusinessException
+     *
+     * @return void
+     */
+    public function setProtocol($protocol)
+    {
+        $this->header->setProtocol($protocol);
     }
 
     /**
@@ -212,6 +212,20 @@ class Connect extends Message
     public function getProtocol()
     {
         return $this->header->getProtocol();
+    }
+
+    /**
+     * Set protocol version.
+     *
+     * @param string $protocolVersion Protocol version.
+     *
+     * @throws BusinessException
+     *
+     * @return void
+     */
+    public function setProtocolVersion($protocolVersion)
+    {
+        $this->header->setProtocolVersion($protocolVersion);
     }
 
     /**

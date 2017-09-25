@@ -44,12 +44,14 @@ class Connect
 
         if (!$socket) {
             throw new NetException(
-                sprintf("Connect to host %s:%d failed after %d seconds, error number %d, error message %s"),
-                $this->host,
-                $this->port,
-                $this->timeOut,
-                $errNo,
-                $errStr
+                sprintf(
+                    "Connect to host %s:%d failed after %d seconds, error number: %d, error message: %s",
+                    $this->host,
+                    $this->port,
+                    $this->timeOut,
+                    $errNo,
+                    $errStr
+                )
             );
         }
         stream_set_timeout($socket, $this->timeOut);

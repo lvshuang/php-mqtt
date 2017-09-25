@@ -6,7 +6,7 @@
  */
 namespace Mqtt\Message\Header;
 
-use Mqtt\Mqtt;
+use Mqtt\BusinessException;
 use Mqtt\Message\Connect;
 use Mqtt\Message\MessageTypes;
 use Mqtt\Message\Util;
@@ -50,9 +50,9 @@ class ConnectHeader extends Header
      */
     protected $clearSessionFlag;
     /**
-     * @var integer Keep alive time.
+     * @var integer Keep alive time, default 5s.
      */
-    protected $keepalive;
+    protected $keepalive = 5;
 
     public function __construct(Connect $message)
     {
@@ -62,15 +62,23 @@ class ConnectHeader extends Header
     /**
      * Build the variable header.
      *
+     * @throws BusinessException
+     *
      * @return string
      */
     final public function buildVarHeader()
     {
         $varHeader = '';
         // Protocol Name
-        $varHeader .= Util::packWithLength(Mqtt::PROTOCOL);
+        if (!$this->protocol) {
+            throw new BusinessException("Protocol not set");
+        }
+        $varHeader .= Util::packWithLength($this->protocol);
         // Protocol Version
-        $varHeader .= chr(Mqtt::VERSION_3_1_1);
+        if (!$this->protocolVersion) {
+            throw new BusinessException("Protocol version not set");
+        }
+        $varHeader .= chr($this->protocolVersion);
 
         $connectFlags = 0;
 
@@ -95,7 +103,7 @@ class ConnectHeader extends Header
             $willFlag |= 0x04; // 0x04 bin is 0000 0100
         }
         $connectFlags |= $willFlag;
-        if ($this->message->getClearSession()) {
+        if ($this->clearSessionFlag) {
             $this->clearSessionFlag = 1;
             $connectFlags |= 2; // 2 bin is 000 0010, hex is 0x02
         }
@@ -218,6 +226,21 @@ class ConnectHeader extends Header
     }
 
     /**
+     * Set protocol.
+     *
+     * @param string $protocol Protocol.
+     *
+     * @throws BusinessException
+     */
+    public function setProtocol($protocol)
+    {
+        if (empty($protocol)) {
+            throw new BusinessException("Protocol error");
+        }
+        $this->protocol = $protocol;
+    }
+
+    /**
      * Return the protocol name.
      *
      * @return string
@@ -228,6 +251,21 @@ class ConnectHeader extends Header
     }
 
     /**
+     * Set protocol version.
+     *
+     * @param string $protocolVersion Protocol version.
+     *
+     * @throws BusinessException
+     */
+    public function setProtocolVersion($protocolVersion)
+    {
+        if (empty($protocolVersion)) {
+            throw new BusinessException("Protocol error");
+        }
+        $this->protocolVersion = $protocolVersion;
+    }
+
+    /**
      * Return the protocol version.
      *
      * @return integer
@@ -235,6 +273,55 @@ class ConnectHeader extends Header
     public function getProtocolVersion()
     {
         return $this->protocolVersion;
+    }
+
+    /**
+     * Set keep alive time.
+     *
+     * @param integer $time Keep alive time.
+     *
+     * @throws BusinessException
+     *
+     * @return void
+     */
+    public function setKeepalive($time)
+    {
+        if ($time !== 0 && !filter_var($time, FILTER_VALIDATE_INT)) {
+            throw new BusinessException("Keep alive time error");
+        }
+        $this->keepalive = $time;
+    }
+
+    /**
+     * Return keep alive.
+     *
+     * @return integer
+     */
+    public function getKeepalive()
+    {
+        return $this->keepalive;
+    }
+
+    /**
+     * Set clear session flag.
+     *
+     * @param boolean $clearSession flag.
+     *
+     * @return void
+     */
+    public function setClearSessionFlag($clearSession)
+    {
+        $this->clearSessionFlag = (boolean) $clearSession;
+    }
+
+    /**
+     * Retusn clear session flag.
+     *
+     * @return boolean
+     */
+    public function getClearSessionFlag()
+    {
+        return $this->clearSessionFlag;
     }
 
 }
