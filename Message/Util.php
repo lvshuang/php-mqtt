@@ -18,6 +18,16 @@ class Util
         return pack('n', $len) . $str;
     }
 
+    public static function unPackWithLength($buffer, &$pos)
+    {
+        $lenByte = substr($buffer, $pos, 2);
+        $pos += 2;
+        $lenArr = unpack('n', $lenByte);
+        $string = substr($buffer, $pos, $lenArr[1]);
+        $pos += strlen($string);
+        return $string;
+    }
+
     public static function encodeRemainLength($len)
     {
         $string = "";
@@ -46,6 +56,16 @@ class Util
         return $value;
     }
 
+    /**
+     * Judge the $msg if contain the remain length.
+     *
+     * @param string  $msg String.
+     * @param integer $pos Start position.
+     *
+     * @return bool
+     *
+     * @throws BusinessException
+     */
     public static function isRemainLengthComplete($msg, &$pos = 1)
     {
         $completed = false;
@@ -57,7 +77,7 @@ class Util
             $digit = $digit >> 7;
             if ($digit > 0) {
                 if ($pos > 4) {
-                    throw new BusinessException('Error remaining lenght');
+                    throw new BusinessException('Error remaining length');
                 }
                 $pos ++;
             } else {
@@ -73,6 +93,34 @@ class Util
         return uniqid('mqtt') . microtime(true) * 10000;
     }
 
+    /**
+     * Parse a string to an message object.
+     *
+     * @param string $buffer Buffer in string.
+     *
+     * @return Message A message instance.
+     *
+     * @throws BusinessException
+     */
+    public static function parse($buffer)
+    {
+        $header = self::parseHeader($buffer);
+        $message = \Mqtt\Message\Message::factory($header['message_type']);
+        $message->setDup($header['dup']);
+        $message->setQos($header['qos']);
+        $message->setRemain($header['remain']);
+        $message->parse($buffer);
+
+        return $message;
+    }
+
+    /**
+     * Parse the fix header.
+     *
+     * @param string $buffer String.
+     *
+     * @return array Header message.
+     */
     public static function parseHeader($buffer)
     {
         $data = ord(substr($buffer, 0, 1));

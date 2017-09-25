@@ -13,16 +13,45 @@ use Mqtt\Message\Util;
 
 class ConnectHeader extends Header
 {
-
+    /**
+     * @var integer Message Type.
+     */
     protected $messageType = MessageTypes::CONNECT;
+    /**
+     * @var string Protocol name in string.
+     */
     protected $protocol;
+    /**
+     * @var integer Protocol version.
+     */
     protected $protocolVersion;
+    /**
+     * @var integer Username flag.
+     */
     protected $userFlag;
+    /**
+     * @var integer Password flag.
+     */
     protected $passFlag;
+    /**
+     * @var integer Will flag.
+     */
     protected $willFlag;
+    /**
+     * @var integer Will retain flag.
+     */
     protected $willRetain;
+    /**
+     * @var string The value of will qos.
+     */
     protected $willQos;
+    /**
+     * @var integer Clear session flag.
+     */
     protected $clearSessionFlag;
+    /**
+     * @var integer Keep alive time.
+     */
     protected $keepalive;
 
     public function __construct(Connect $message)
@@ -84,16 +113,10 @@ class ConnectHeader extends Header
      */
     final public function parseVarHeader($byte, &$pos)
     {
-        $twoBytes = substr($byte, $pos, 2);
-        $pos += 2;
-        $protocolLen = unpack('n', $twoBytes);
-        $protocol = substr($byte, $pos, $protocolLen[1]);
+        $this->protocol = Util::unPackWithLength($byte, $pos);
 
-        $pos += strlen($protocol);
         $version = ord(substr($byte, $pos, 1));
         $pos +=1;
-
-        $this->protocol = $protocol;
         $this->protocolVersion = $version;
 
         $this->parseConnectFlag($byte, $pos);
@@ -124,6 +147,7 @@ class ConnectHeader extends Header
         $this->willQos = $willQos;
         $this->willRetain = $willRetain;
         $this->clearSessionFlag = $clearSessionFlag;
+        $this->message->setClearSession($this->clearSessionFlag);
     }
 
     /**
@@ -141,6 +165,76 @@ class ConnectHeader extends Header
         $pos += 2;
         $this->keepalive = $result[1];
         $this->message->setKeepalive($this->keepalive);
+    }
+
+    /**
+     * Get user flag.
+     *
+     * @return integer
+     */
+    public function getUserFlag()
+    {
+        return $this->userFlag;
+    }
+
+    /**
+     * Get password flag.
+     *
+     * @return integer
+     */
+    public function getPassFlag()
+    {
+        return $this->passFlag;
+    }
+
+    /**
+     * Get will flag.
+     *
+     * @return integer
+     */
+    public function getWillFlag()
+    {
+        return $this->willFlag;
+    }
+
+    /**
+     * Get will QoS value.
+     *
+     * @return integer
+     */
+    public function getWillQos()
+    {
+        return $this->willQos;
+    }
+
+    /**
+     * Get will remain flag.
+     *
+     * @return integer
+     */
+    public function getWillRemain()
+    {
+        return $this->willRetain;
+    }
+
+    /**
+     * Return the protocol name.
+     *
+     * @return string
+     */
+    public function getProtocol()
+    {
+        return $this->protocol;
+    }
+
+    /**
+     * Return the protocol version.
+     *
+     * @return integer
+     */
+    public function getProtocolVersion()
+    {
+        return $this->protocolVersion;
     }
 
 }

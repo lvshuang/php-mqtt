@@ -6,6 +6,7 @@
  */
 namespace Mqtt\Message;
 
+use Mqtt\BusinessException;
 use Mqtt\Message\Header\ConnectHeader;
 use Mqtt\Message\Will\Will;
 
@@ -15,6 +16,10 @@ class Connect extends Message
      * @var int message type.
      */
     protected $messageType = MessageTypes::CONNECT;
+    /**
+     * @var string Client id.
+     */
+    protected $clientId;
     /**
      * @var string username.
      */
@@ -60,6 +65,33 @@ class Connect extends Message
     public function getMessageType()
     {
         return $this->header->getMessageType();
+    }
+
+    /**
+     * Set client id.
+     *
+     * @param string $clientId client id.
+     *
+     * @throws BusinessException
+     *
+     * @return void
+     */
+    public function setClientId($clientId)
+    {
+        if (!$clientId) {
+            throw new BusinessException('Client id Error');
+        }
+        $this->clientId = $clientId;
+    }
+
+    /**
+     * Get client id.
+     *
+     * @return string
+     */
+    public function getClientId()
+    {
+        return $this->clientId;
     }
 
     /**
@@ -173,6 +205,26 @@ class Connect extends Message
     }
 
     /**
+     * Return protocol name.
+     *
+     * @return string
+     */
+    public function getProtocol()
+    {
+        return $this->header->getProtocol();
+    }
+
+    /**
+     * Return protocol version.
+     *
+     * @return integer
+     */
+    public function getProtocolVersion()
+    {
+        return $this->header->getProtocolVersion();
+    }
+
+    /**
      * Return message body.
      *
      * @return string message body.
@@ -189,9 +241,8 @@ class Connect extends Message
      */
     final public function buildBody()
     {
-        $clientId = Util::makeClientId();
         $body = '';
-        $body .= Util::packWithLength($clientId);
+        $body .= Util::packWithLength($this->getClientId());
         if ($this->will) {
             $body .= Util::packWithLength($this->will->getWillTopic());
             $body .= Util::packWithLength($this->will->getWillContent());
@@ -217,6 +268,36 @@ class Connect extends Message
         $pos = 1; // The remain length is start from second byte.
         $remainLen = \Mqtt\Message\Util::decodeRemainLength($buffer, $pos);
         $this->header->parseVarHeader($buffer, $pos);
+        $this->parseBody($buffer, $pos);
+    }
+
+    /**
+     * Parse the message body.
+     *
+     * @param string  $buffer String.
+     * @param integer $pos    Start position.
+     *
+     * @return void
+     */
+    final protected function parseBody($buffer, &$pos)
+    {
+        $clientId = Util::unPackWithLength($buffer, $pos);
+        $this->clientId = $clientId;
+        if ($this->header->getWillFlag()) {
+            $will = new Will();
+            $will->setWillTopic(Util::unPackWithLength($buffer, $pos));
+            $will->setWillContent(Util::unPackWithLength($buffer, $pos));
+            $will->setQos($this->header->getQos());
+            $will->setRetain($this->header->getWillRemain());
+            $this->will = $will;
+        }
+
+        if ($this->header->getUserFlag()) {
+            $this->username = Util::unPackWithLength($buffer, $pos);
+        }
+        if ($this->header->getPassFlag()) {
+            $this->password = Util::unPackWithLength($buffer, $pos);
+        }
     }
 
 }

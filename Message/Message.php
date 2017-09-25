@@ -9,7 +9,7 @@ namespace Mqtt\Message;
 use Mqtt\BusinessException;
 use Mqtt\Message\Header\Header;
 
-class Message
+abstract class Message
 {
     /**
      * @var Header
@@ -140,8 +140,6 @@ class Message
      *
      * @return void
      */
-    public function parse($buffer)
-    {
-    }
+    abstract public function parse($buffer);
 
 }

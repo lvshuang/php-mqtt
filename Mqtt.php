@@ -9,6 +9,7 @@ namespace Mqtt;
 use Mqtt\Message\Connect;
 use Mqtt\Message\Message;
 use Mqtt\Message\MessageTypes;
+use Mqtt\Message\Util;
 use Mqtt\Message\Will\Will;
 
 class Mqtt
@@ -56,6 +57,7 @@ class Mqtt
         $connectMsg->setWill($this->will);
         $connectMsg->setUsername($username);
         $connectMsg->setPassword($password);
+        $connectMsg->setClientId(Util::makeClientId());
         $connectMsg->setClearSession(true);
 
         $writeContent = $connectMsg->build();

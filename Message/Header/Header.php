@@ -10,7 +10,7 @@ use Mqtt\Message\Util;
 use Mqtt\BusinessException;
 use Mqtt\Message\Message;
 
-class Header
+abstract class Header
 {
     /**
      * @var Message $message Message instance.
@@ -55,6 +55,11 @@ class Header
         $this->message = $message;
     }
 
+    /**
+     * Build fix header and var header.
+     *
+     * @return string
+     */
     public function build()
     {
         $firstByte = $this->messageType << 4; // Message type flag: 4 bit, from 0 to 15
@@ -68,6 +73,21 @@ class Header
         $fixedHeader .= $remainLength;
         return $fixedHeader . $this->variableHeader;
     }
+
+    /**
+     * Build var header.
+     *
+     * @return mixed
+     */
+    abstract public function buildVarHeader();
+
+    /**
+     * Parse variable header from byte.
+     *
+     * @param string  $byte buffer.
+     * @param integer $pos  The start position.
+     */
+    abstract public function parseVarHeader($byte, &$pos);
 
     /**
      * Return message type.
