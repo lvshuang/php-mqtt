@@ -6,6 +6,7 @@
  */
 namespace Mqtt\Socket;
 
+use Mqtt\Message\Util;
 use Mqtt\NetException;
 
 class Connect
@@ -80,11 +81,11 @@ class Connect
     {
         $readBuffer = '';
         while (!feof($this->connection)) {
-            $buffer = @fread($this->connection, 65535);
-            if (!$buffer) {
+            $buffer = fread($this->connection, 65535);
+            $readBuffer .= $buffer;
+            if (Util::isRemainLengthComplete($readBuffer)) {
                 break;
             }
-            $readBuffer .= $buffer;
         }
         return $readBuffer;
     }

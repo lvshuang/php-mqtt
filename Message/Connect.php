@@ -29,11 +29,6 @@ class Connect extends Message
      */
     protected $will;
     /**
-     * @var string Message body.
-     */
-    protected $msgBody = '';
-
-    /**
      * Connect constructor, set header in the constructor.
      *
      * @return Connect
@@ -41,16 +36,6 @@ class Connect extends Message
     public function __construct()
     {
         $this->header = new ConnectHeader($this);
-    }
-
-    /**
-     * Get the message type.
-     *
-     * @return int
-     */
-    public function getMessageType()
-    {
-        return $this->header->getMessageType();
     }
 
     /**
@@ -239,16 +224,6 @@ class Connect extends Message
     }
 
     /**
-     * Return message body.
-     *
-     * @return string message body.
-     */
-    public function getMessageBody()
-    {
-        return $this->msgBody;
-    }
-
-    /**
      * Build body.
      *
      * @return string
@@ -280,7 +255,7 @@ class Connect extends Message
     final public function parse($buffer)
     {
         $pos = 1; // The remain length is start from second byte.
-        $remainLen = \Mqtt\Message\Util::decodeRemainLength($buffer, $pos);
+        \Mqtt\Message\Util::decodeRemainLength($buffer, $pos);
         $this->header->parseVarHeader($buffer, $pos);
         $this->parseBody($buffer, $pos);
     }

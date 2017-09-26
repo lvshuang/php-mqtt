@@ -7,6 +7,7 @@
 namespace Mqtt;
 
 use Mqtt\Message\Connect;
+use Mqtt\Message\ConnectCodes;
 use Mqtt\Message\Message;
 use Mqtt\Message\MessageTypes;
 use Mqtt\Message\Util;
@@ -33,6 +34,8 @@ class Mqtt
     protected $version = self::VERSION_3_1_1;
     protected $socket;
     protected $will;
+
+    public $onConnect;
 
     public function __construct()
     {
@@ -66,9 +69,23 @@ class Mqtt
         if ($this->socket) {
             $this->socket->write($writeContent);
         }
+        $buffer = $this->socket->read();
+        $message = Util::parse($buffer);
 
-        $message = $this->socket->read();
-        echo "Get from server: " . $message;
+        // Todo: 确认连接建立后第一个包是否必须是 connect ack.
+        if ($message->getMessageType() === MessageTypes::CONNACK) {
+            if (is_callable($this->onConnect)) {
+                call_user_func($this->onConnect, $message);
+                return true;
+            }
+            if ($message->getConnectCode() !== ConnectCodes::CONNECT_OK) {
+                $this->socket->close(); // Server refused connect, close it.
+                throw new \Exception("Connect error, code: " . $this->getConnectCode() . ", session present is " . $message->getSessionPresent());
+            }
+            return $message;
+        } else {
+            //Todo: 如果连接建立后第一个包必须是 connect ack 包, 则需要在这里处理异常.
+        }
     }
 
 }

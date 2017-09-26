@@ -67,8 +67,8 @@ class MessageTypes
     const DISCONNECT    = 0x0E;
 
     public static $msgTypeMap = [
-        self::CONNECT => 'CONNECT',
-        self::CONNACK => 'CONNACK',
+        self::CONNECT => 'Connect',
+        self::CONNACK => 'ConnectAck',
         self::PUBLISH => 'PUBLISH',
         self::PUBACK => 'PUBACK',
         self::PUBREC => 'PUBREC',

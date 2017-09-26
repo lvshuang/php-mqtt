@@ -15,6 +15,10 @@ abstract class Message
      * @var Header
      */
     protected $header;
+    /**
+     * @var string Message body.
+     */
+    protected $msgBody = '';
 
     /**
      * Create message instance.
@@ -32,7 +36,7 @@ abstract class Message
         }
         $className = MessageTypes::$msgTypeMap[$msgType];
 
-        $class = "Mqtt\\Message\\" . ucfirst(strtolower($className));
+        $class = "Mqtt\\Message\\" . ucfirst($className);
         if (!class_exists($class)) {
             throw new BusinessException('Class ' . $class . ' not found');
         }
@@ -132,6 +136,23 @@ abstract class Message
     {
         return $this->header->getRemain();
     }
+
+    /**
+     * Return message body.
+     *
+     * @return string message body.
+     */
+    public function getMessageBody()
+    {
+        return $this->msgBody;
+    }
+
+    /**
+     * Build the message body.
+     *
+     * @return mixed
+     */
+    abstract public function buildBody();
 
     /**
      * Parse message data from the received buffer.
