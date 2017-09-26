@@ -18,6 +18,15 @@ class ConnectAckHeader extends Header
     protected $sessionPresent = null;
     protected $validSessionPresent = [0, 1];
 
+    /**
+     * Set session present value.
+     *
+     * @param integer $sessionPresent Session present value.
+     *
+     * @throws \Mqtt\BusinessException
+     *
+     * @return void
+     */
     public function setSessionPresent($sessionPresent)
     {
         if (!in_array($sessionPresent, $this->validSessionPresent)) {
@@ -26,11 +35,25 @@ class ConnectAckHeader extends Header
         $this->sessionPresent = $sessionPresent;
     }
 
+    /**
+     * Get session present.
+     *
+     * @return integer
+     */
     public function getSessionPresent()
     {
         return $this->sessionPresent;
     }
 
+    /**
+     * Set connect return code.
+     *
+     * @param integer $code Connect code.
+     *
+     * @throws \Mqtt\BusinessException
+     *
+     * @return void
+     */
     public function setConnectCode($code)
     {
         if (!in_array($code, ConnectCodes::$validCodes)) {
@@ -39,11 +62,23 @@ class ConnectAckHeader extends Header
         $this->connectCode = $code;
     }
 
+    /**
+     * Get connect return code.
+     *
+     * @return integer
+     */
     public function getConnectCode()
     {
         return $this->connectCode;
     }
 
+    /**
+     * Build variable header.
+     *
+     * @return string
+     *
+     * @throws BusinessException
+     */
     final public function buildVarHeader()
     {
         if (!isset($this->sessionPresent) ||
@@ -65,6 +100,14 @@ class ConnectAckHeader extends Header
         return $this->variableHeader;
     }
 
+    /**
+     * Parse variable header.
+     *
+     * @param string  $byte String.
+     * @param integer $pos  Start substr position.
+     *
+     * @return void
+     */
     final public function parseVarHeader($byte, &$pos)
     {
         $connectConfirmFlag = ord(substr($byte, $pos, 1));
